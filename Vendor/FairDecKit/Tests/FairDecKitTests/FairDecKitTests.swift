@@ -56,7 +56,7 @@ final class FairDecKitTests: XCTestCase {
             let source = Array(hex(vector.source)), work = Array(hex(vector.work))
             XCTAssertEqual(Data(transform(source, work)), hex(vector.block))
             XCTAssertEqual(Data(finish(source)), hex(vector.finish))
-            XCTAssertEqual(sourceBlocks(source, index: vector.index).map(Data.init), vector.sources.map(hex))
+            XCTAssertEqual(sourceBlocks(source, index: vector.index).map { Data($0) }, vector.sources.map(hex))
             XCTAssertEqual(Data(derivePageKey(wrapped: source, index: vector.index, work: work, transform: transform)), hex(vector.key))
         }
     }
