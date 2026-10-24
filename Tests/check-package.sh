@@ -9,7 +9,7 @@ trap 'rm -rf "$work_dir"' EXIT
 tar -xzf "$archive" -C "$work_dir"
 cd "$work_dir"
 test -x ipadecrypt
-test -f fairdeckit_FairDecKit.bundle/Contents/Resources/transform_const_data.bin
+test -n "$(find fairdeckit_FairDecKit.bundle -type f -name transform_const_data.bin -print)"
 test -d ZIPFoundation_ZIPFoundation.bundle
 ./ipadecrypt --help
 printf '\000\001\002\003\004\005\006\007\010\011\012\013\014\015\016\017' > credential.bin
