@@ -45,7 +45,20 @@ GitHub Actionsはpush・Pull Request・手動実行で起動し、Apple Silicon�
 成功した実行のActions画面のArtifactsから、各アーキテクチャの配布用アーカイブをダウンロードできます。
 ダウンロードしたArtifactのZIPを開き、中の `.tar.gz` を展開してください。
 実行ファイルと同じディレクトリにある2つの `.bundle` は、そのまま一緒に配置します。
-署名・公証やGitHub Releasesへの自動公開は行いません。
+
+タグをpushすると、両アーキテクチャのビルド・検証成功後にGitHub Releaseを自動作成し、
+`ipadecrypt-macos-arm64.tar.gz` と `ipadecrypt-macos-x86_64.tar.gz` を添付します。
+Release名はタグ名、リリースノートはGitHubの自動生成です。すべてのタグ名が対象です。
+
+```sh
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+ブランチへのpush・Pull Request・手動実行ではReleaseを作成しません。
+公開ジョブだけに `contents: write` を付与し、組み込みの `GITHUB_TOKEN` を使うため追加のSecretは不要です。
+同名タグのReleaseが既にある場合は上書きせずエラー終了します。公開後の更新には新しいタグを使ってください。
+署名・公証は行いません。
 
 ## 使い方
 

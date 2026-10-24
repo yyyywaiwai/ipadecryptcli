@@ -2,6 +2,8 @@ name: Build binaries
 
 on:
   push:
+    branches: ['**']
+    tags: ['**']
   pull_request:
   workflow_dispatch:
 
@@ -37,3 +39,31 @@ jobs:
           name: ipadecrypt-macos-${{ matrix.arch }}
           path: dist/ipadecrypt-macos-${{ matrix.arch }}.tar.gz
           if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Download binary archives
+        uses: actions/download-artifact@v8
+        with:
+          pattern: ipadecrypt-macos-*
+          path: dist
+          merge-multiple: true
+      - name: Publish release with both architectures
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          test -s dist/ipadecrypt-macos-arm64.tar.gz
+          test -s dist/ipadecrypt-macos-x86_64.tar.gz
+          gh release create "$TAG" \
+            dist/ipadecrypt-macos-arm64.tar.gz \
+            dist/ipadecrypt-macos-x86_64.tar.gz \
+            --verify-tag --generate-notes --title "$TAG"
