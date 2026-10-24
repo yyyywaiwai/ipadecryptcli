@@ -8,13 +8,20 @@ Swift 5.9以降、macOS 12以降に対応します。
 ```sh
 git clone https://github.com/yyyywaiwai/ipadecryptcli.git
 cd ipadecryptcli
-swift build -c release
+make
+./dist/ipadecrypt --help
+```
 
+`make`（`make build`）でReleaseビルドし、実行ファイルと必要なリソースbundleを `dist/` にまとめます。
+ビルドしたMacのアーキテクチャ向けです。Xcode Command Line Toolsなど、Swiftとmakeを含む開発環境が必要です。
+
+インストールする場合：
+
+```sh
 mkdir -p "$HOME/.local/bin" "$HOME/.local/lib/ipadecrypt"
-BIN_DIR="$(swift build -c release --show-bin-path)"
 # Install the resource bundles alongside the executable.
-cp "$BIN_DIR/ipadecrypt" "$HOME/.local/lib/ipadecrypt/"
-cp -R "$BIN_DIR/"*.bundle "$HOME/.local/lib/ipadecrypt/"
+cp dist/ipadecrypt "$HOME/.local/lib/ipadecrypt/"
+cp -R dist/*.bundle "$HOME/.local/lib/ipadecrypt/"
 ln -s "$HOME/.local/lib/ipadecrypt/ipadecrypt" "$HOME/.local/bin/ipadecrypt"
 export PATH="$HOME/.local/bin:$PATH"
 ```
@@ -25,6 +32,20 @@ export PATH="$HOME/.local/bin:$PATH"
 
 検証済みのFairDecKitを `Vendor/FairDecKit` に同梱しています。
 隣接する別のローカルリポジトリは不要です。ZIP処理の依存先はZIPFoundation 0.9.20です。
+
+### 配布用アーカイブとGitHub Actions
+
+```sh
+make package        # dist/ipadecrypt-macos-<arch>.tar.gz を作成
+make check-package  # アーカイブを一時ディレクトリに展開し、起動と合成IPAの復号を確認
+```
+
+GitHub Actionsはpush・Pull Request・手動実行で起動し、Apple Silicon（arm64）とIntel（x86_64）の両方で
+`make test` と `make check-package` を実行します。
+成功した実行のActions画面のArtifactsから、各アーキテクチャの配布用アーカイブをダウンロードできます。
+ダウンロードしたArtifactのZIPを開き、中の `.tar.gz` を展開してください。
+実行ファイルと同じディレクトリにある2つの `.bundle` は、そのまま一緒に配置します。
+署名・公証やGitHub Releasesへの自動公開は行いません。
 
 ## 使い方
 
@@ -85,6 +106,8 @@ ZIP32のサイズ・オフセットが上限に達する場合は、必要なフ
 ## テスト
 
 ```sh
+make test
+# または個別に実行：
 swift test
 swift test --package-path Vendor/FairDecKit
 ```
